@@ -1,0 +1,153 @@
+.payment-success-page {
+  min-height: 75vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 15px;
+}
+
+.success-card {
+  width: 100%;
+  max-width: 600px;
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 45px;
+  text-align: center;
+}
+
+.success-icon {
+  width: 70px;
+  height: 70px;
+  margin: 0 auto 20px;
+  border-radius: 50%;
+  background: #e8f7ee;
+  color: #168544;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 38px;
+  font-weight: bold;
+}
+
+.success-card h1 {
+  font-size: 30px;
+  margin-bottom: 12px;
+}
+
+.success-message {
+  color: var(--muted);
+  line-height: 1.6;
+  margin-bottom: 25px;
+}
+
+.order-number {
+  background: var(--light-orange);
+  border-radius: 7px;
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-bottom: 25px;
+}
+
+.order-number span {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.order-number strong {
+  color: var(--orange);
+  font-size: 18px;
+}
+
+.success-details {
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  padding: 20px 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+}
+
+.success-details div {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.success-details span {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.success-details strong {
+  font-size: 14px;
+}
+
+.success-details .paid {
+  color: #168544;
+}
+
+.delivery-message {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.6;
+  margin: 25px 0;
+}
+
+.success-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.view-orders-button,
+.continue-shopping-button {
+  flex: 1;
+  padding: 13px;
+  border-radius: 5px;
+  text-decoration: none;
+  font-weight: 600;
+  text-align: center;
+}
+
+.view-orders-button {
+  background: var(--orange);
+  color: white;
+}
+
+.view-orders-button:hover {
+  background: var(--dark-orange);
+}
+
+.continue-shopping-button {
+  border: 1px solid var(--orange);
+  color: var(--orange);
+  background: white;
+}
+
+.continue-shopping-button:hover {
+  background: var(--light-orange);
+}
+
+@media (max-width: 600px) {
+  .payment-success-page {
+    padding: 35px 15px;
+  }
+
+  .success-card {
+    padding: 30px 20px;
+  }
+
+  .success-card h1 {
+    font-size: 25px;
+  }
+
+  .success-details {
+    grid-template-columns: 1fr;
+  }
+
+  .success-actions {
+    flex-direction: column;
+  }
+}
