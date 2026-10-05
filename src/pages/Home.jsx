@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import api from "../api/axios";
+import imageUrl from "../utils/imageUrl";
 import { useCart } from "../context/CartContext";
 import { useWishlist } from "../context/WishlistContext";
 

@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { useWishlist } from "../context/WishlistContext";
 import { useCart } from "../context/CartContext";
+import imageUrl from "../utils/imageUrl";
 
 function Wishlist() {
   const { wishlist, removeFromWishlist } = useWishlist();

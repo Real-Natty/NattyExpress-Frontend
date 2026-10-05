@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useCart } from "../context/CartContext";
 import { useParams } from "react-router-dom";
 import api from "../api/axios";
+import imageUrl from "../utils/imageUrl";
 
 function ProductDetails() {
   const { addToCart } = useCart();
