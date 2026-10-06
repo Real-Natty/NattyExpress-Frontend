@@ -551,7 +551,7 @@ function Admin() {
           </label>
 
           <div className="admin-form-buttons">
-            <button type="submit">
+            <button type="submit" className="admin-submit-button">
               {editingProductId ? "Update Product" : "Add Product"}
             </button>
 

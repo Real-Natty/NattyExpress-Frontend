@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import api from "../api/axios";
-import imageUrl from "../utils/imageUrl";
+// import imageUrl from "../utils/imageUrl";
 import "./PaymentSuccess.css";
 
 function PaymentSuccess() {
@@ -36,8 +36,17 @@ function PaymentSuccess() {
           throw new Error("Your cart information was not found.");
         }
 
+        const paymentData = JSON.parse(
+          sessionStorage.getItem("nattyexpress-payment") || "null",
+        );
+
+        if (!paymentData) {
+          throw new Error("Payment information was not found.");
+        }
+
         const response = await api.post(`/payments/verify/${reference}`, {
           customer: checkoutData,
+          paymentMethod: paymentData.paymentMethod,
           items: cart.map((item) => ({
             productId: item._id,
             quantity: item.quantity,

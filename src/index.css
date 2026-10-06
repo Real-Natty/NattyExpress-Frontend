@@ -1371,6 +1371,36 @@ a {
   border-radius: 10px;
 }
 
+.admin-submit-button {
+  flex: 1;
+  padding: 13px 20px;
+  border: none;
+  border-radius: 8px;
+  background: #e87500;
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease;
+}
+
+.admin-submit-button:hover {
+  background: #c96300;
+  transform: translateY(-1px);
+}
+
+.admin-submit-button:active {
+  transform: translateY(0);
+}
+
+.admin-submit-button:disabled {
+  background: #aaa;
+  cursor: not-allowed;
+  transform: none;
+}
+
 /* low stock sect */
 
 .low-stock-section {
