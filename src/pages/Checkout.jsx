@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
 import imageUrl from "../utils/imageUrl";
+import "./LoginRequired.css";
 
 function Checkout() {
   const { cart, cartTotal } = useCart();
@@ -74,14 +75,18 @@ function Checkout() {
 
   if (!user) {
     return (
-      <main className="container checkout-page">
-        <div className="checkout-form-card">
+      <main className="container login-required-page">
+        <div className="login-required-card">
+          <div className="login-required-icon">🔒</div>
+
           <h1>Login Required</h1>
-
-          <p>Please log in or create an account before placing an order.</p>
-
+          <p className="login-required-description">
+            You're just one step away from your order! Please log in to your
+            account or create a new one to continue shopping securely.
+          </p>
           <button
             type="button"
+            className="login-required-primary"
             onClick={() =>
               navigate("/login", {
                 state: { from: "/checkout" },
@@ -90,10 +95,12 @@ function Checkout() {
           >
             Login to Continue
           </button>
-
-          <p>
-            Don't have an account? <Link to="/register">Sign Up</Link>
-          </p>
+          <Link to="/register" className="login-required-secondary">
+            Create an Account
+          </Link>
+          <Link to="/cart" className="login-required-back">
+            Return to Cart
+          </Link>
         </div>
       </main>
     );

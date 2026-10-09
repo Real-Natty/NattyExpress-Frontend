@@ -6,6 +6,7 @@ import { useCart } from "../context/CartContext";
 import imageUrl from "../utils/imageUrl";
 import api from "../api/axios";
 import "./PaymentConfirmation.css";
+import "./LoginRequired.css";
 
 function PaymentConfirmation() {
   const { user, loading: authLoading } = useAuth();
@@ -28,23 +29,34 @@ function PaymentConfirmation() {
 
   if (!user) {
     return (
-      <main className="container payment-confirmation-page">
-        <h1>Login Required</h1>
-        <p>Please log in or create an account before placing an order.</p>
-
-        <button
-          onClick={() =>
-            navigate("/login", {
-              state: { from: "/checkout" },
-            })
-          }
-        >
-          Login to Continue
-        </button>
-
-        <p>
-          Don't have an account? <Link to="/register">Create one</Link>
-        </p>
+      <main className="container login-required-page">
+        {" "}
+        <div className="login-required-card">
+          {" "}
+          <div className="login-required-icon">🔒</div>
+          <h1>Login Required</h1>
+          <p className="login-required-description">
+            Please log in or create an account before placing your order. Your
+            shopping experience is important to us.
+          </p>
+          <button
+            type="button"
+            className="login-required-primary"
+            onClick={() =>
+              navigate("/login", {
+                state: { from: "/checkout" },
+              })
+            }
+          >
+            Login to Continue
+          </button>
+          <Link to="/register" className="login-required-secondary">
+            Create an Account
+          </Link>
+          <Link to="/cart" className="login-required-back">
+            Return to Cart
+          </Link>
+        </div>
       </main>
     );
   }
