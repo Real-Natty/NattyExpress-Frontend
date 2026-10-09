@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
 
@@ -14,6 +14,7 @@ function PaymentSuccess() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [order, setOrder] = useState(null);
+  const verificationStarted = useRef(false);
 
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
@@ -25,14 +26,19 @@ function PaymentSuccess() {
     if (authLoading) return;
 
     if (!user) {
+      setLoading(false);
+
       navigate("/login", {
         replace: true,
         state: { from: "/payment-success" },
       });
+
       return;
     }
 
-    let cancelled = false;
+    if (verificationStarted.current) return;
+
+    verificationStarted.current = true;
 
     const verifyPayment = async () => {
       try {
