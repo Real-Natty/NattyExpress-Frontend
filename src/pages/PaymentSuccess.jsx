@@ -78,8 +78,6 @@ function PaymentSuccess() {
           },
         );
 
-        if (cancelled) return;
-
         setOrder(response.data.order);
 
         clearCart();
@@ -88,8 +86,6 @@ function PaymentSuccess() {
         sessionStorage.removeItem("nattyexpress-payment");
         sessionStorage.removeItem("nattyexpress-payment-reference");
       } catch (error) {
-        if (cancelled) return;
-
         console.error("Payment verification error:", error);
 
         setError(
@@ -98,17 +94,11 @@ function PaymentSuccess() {
             "We could not verify your payment.",
         );
       } finally {
-        if (!cancelled) {
-          setLoading(false);
-        }
+        setLoading(false);
       }
     };
 
     verifyPayment();
-
-    return () => {
-      cancelled = true;
-    };
   }, [authLoading, user, reference, cart, clearCart, navigate]);
 
   if (loading) {
