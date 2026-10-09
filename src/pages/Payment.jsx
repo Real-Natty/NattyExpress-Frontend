@@ -1,15 +1,53 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
+import { useAuth } from "../context/AuthContext";
 import imageUrl from "../utils/imageUrl";
 import "./Payment.css";
 
 function Payment() {
   const { cart, cartTotal } = useCart();
+  const { user, loading } = useAuth();
   const navigate = useNavigate();
 
   const [paymentMethod, setPaymentMethod] = useState("card");
+  if (loading) {
+    return (
+      <main className="container payment-page">
+        <p>Checking your login status...</p>
+      </main>
+    );
+  }
 
+  if (!user) {
+    return (
+      <main className="container payment-page">
+        <div className="payment-card">
+          <h1>Login Required</h1>
+
+          <p>
+            Please log in or create an account before proceeding with payment.
+          </p>
+
+          <button
+            type="button"
+            className="pay-button"
+            onClick={() =>
+              navigate("/login", {
+                state: { from: "/checkout" },
+              })
+            }
+          >
+            Login to Continue
+          </button>
+
+          <p>
+            Don't have an account? <Link to="/register">Sign Up</Link>
+          </p>
+        </div>
+      </main>
+    );
+  }
   if (cart.length === 0) {
     return (
       <main className="container payment-page">

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import api from "../api/axios";
 import { useAuth } from "../context/AuthContext";
 
@@ -10,6 +10,7 @@ function Login() {
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
+  const location = useLocation();
   const { setUser } = useAuth();
 
   const handleLogin = async (e) => {
@@ -30,7 +31,8 @@ function Login() {
       setMessage("Login successful!");
 
       setTimeout(() => {
-        navigate("/");
+        const destination = location.state?.from || "/";
+        navigate(destination, { replace: true });
       }, 1000);
     } catch (error) {
       setMessage(

@@ -1,11 +1,14 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+
+import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
 import imageUrl from "../utils/imageUrl";
 import api from "../api/axios";
 import "./PaymentConfirmation.css";
 
 function PaymentConfirmation() {
+  const { user, loading: authLoading } = useAuth();
   const { cart, cartTotal } = useCart();
   const navigate = useNavigate();
 
@@ -19,6 +22,32 @@ function PaymentConfirmation() {
   const paymentData = JSON.parse(
     sessionStorage.getItem("nattyexpress-payment") || "null",
   );
+  if (authLoading) {
+    return <main className="container">Checking your account...</main>;
+  }
+
+  if (!user) {
+    return (
+      <main className="container payment-confirmation-page">
+        <h1>Login Required</h1>
+        <p>Please log in or create an account before placing an order.</p>
+
+        <button
+          onClick={() =>
+            navigate("/login", {
+              state: { from: "/checkout" },
+            })
+          }
+        >
+          Login to Continue
+        </button>
+
+        <p>
+          Don't have an account? <Link to="/register">Create one</Link>
+        </p>
+      </main>
+    );
+  }
 
   if (cart.length === 0 || !checkoutData || !paymentData) {
     return (

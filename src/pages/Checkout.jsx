@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
@@ -6,7 +6,7 @@ import imageUrl from "../utils/imageUrl";
 
 function Checkout() {
   const { cart, cartTotal } = useCart();
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
 
   const navigate = useNavigate();
 
@@ -18,6 +18,15 @@ function Checkout() {
     city: "",
     state: "",
   });
+  useEffect(() => {
+    if (user) {
+      setFormData((current) => ({
+        ...current,
+        fullName: current.fullName || user.name || "",
+        email: current.email || user.email || "",
+      }));
+    }
+  }, [user]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -28,17 +37,67 @@ function Checkout() {
     }));
   };
 
+  // const handleSubmit = (e) => {
+  //   e.preventDefault();
+
+  //   // Save the customer's delivery information
+  //   // temporarily so the payment page can use it.
+  //   sessionStorage.setItem("nattyexpress-checkout", JSON.stringify(formData));
+
+  //   // Continue to payment
+  //   navigate("/payment");
+  // };
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    // Save the customer's delivery information
-    // temporarily so the payment page can use it.
+    if (loading) return;
+
+    if (!user) {
+      navigate("/login", {
+        state: { from: "/checkout" },
+      });
+
+      return;
+    }
+
     sessionStorage.setItem("nattyexpress-checkout", JSON.stringify(formData));
 
-    // Continue to payment
     navigate("/payment");
   };
+  if (loading) {
+    return (
+      <main className="container checkout-page">
+        <p>Checking your login status...</p>
+      </main>
+    );
+  }
 
+  if (!user) {
+    return (
+      <main className="container checkout-page">
+        <div className="checkout-form-card">
+          <h1>Login Required</h1>
+
+          <p>Please log in or create an account before placing an order.</p>
+
+          <button
+            type="button"
+            onClick={() =>
+              navigate("/login", {
+                state: { from: "/checkout" },
+              })
+            }
+          >
+            Login to Continue
+          </button>
+
+          <p>
+            Don't have an account? <Link to="/register">Sign Up</Link>
+          </p>
+        </div>
+      </main>
+    );
+  }
   if (cart.length === 0) {
     return (
       <main className="container checkout-page">

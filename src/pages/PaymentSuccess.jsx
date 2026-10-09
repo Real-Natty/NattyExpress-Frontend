@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import { Link, useSearchParams, useNavigate } from "react-router-dom";
+
 import { useCart } from "../context/CartContext";
 import api from "../api/axios";
 // import imageUrl from "../utils/imageUrl";
@@ -13,11 +15,25 @@ function PaymentSuccess() {
   const [error, setError] = useState("");
   const [order, setOrder] = useState(null);
 
+  const { user, loading: authLoading } = useAuth();
+  const navigate = useNavigate();
   const reference =
     searchParams.get("reference") ||
     sessionStorage.getItem("nattyexpress-payment-reference");
 
   useEffect(() => {
+    if (authLoading) return;
+
+    if (!user) {
+      navigate("/login", {
+        replace: true,
+        state: { from: "/payment-success" },
+      });
+      return;
+    }
+
+    let cancelled = false;
+
     const verifyPayment = async () => {
       try {
         if (!reference) {
@@ -28,30 +44,35 @@ function PaymentSuccess() {
           sessionStorage.getItem("nattyexpress-checkout") || "null",
         );
 
-        if (!checkoutData) {
-          throw new Error("Checkout information was not found.");
-        }
-
-        if (!cart || cart.length === 0) {
-          throw new Error("Your cart information was not found.");
-        }
-
         const paymentData = JSON.parse(
           sessionStorage.getItem("nattyexpress-payment") || "null",
         );
 
-        if (!paymentData) {
-          throw new Error("Payment information was not found.");
+        if (!checkoutData || !paymentData) {
+          throw new Error(
+            "Checkout information is missing. Please contact support if your payment was deducted.",
+          );
         }
 
-        const response = await api.post(`/payments/verify/${reference}`, {
-          customer: checkoutData,
-          paymentMethod: paymentData.paymentMethod,
-          items: cart.map((item) => ({
-            productId: item._id,
-            quantity: item.quantity,
-          })),
-        });
+        if (!cart || cart.length === 0) {
+          throw new Error(
+            "Your cart information is missing. Please contact support if your payment was deducted.",
+          );
+        }
+
+        const response = await api.post(
+          `/payments/verify/${encodeURIComponent(reference)}`,
+          {
+            customer: checkoutData,
+            paymentMethod: paymentData.paymentMethod,
+            items: cart.map((item) => ({
+              productId: item._id,
+              quantity: item.quantity,
+            })),
+          },
+        );
+
+        if (cancelled) return;
 
         setOrder(response.data.order);
 
@@ -61,6 +82,8 @@ function PaymentSuccess() {
         sessionStorage.removeItem("nattyexpress-payment");
         sessionStorage.removeItem("nattyexpress-payment-reference");
       } catch (error) {
+        if (cancelled) return;
+
         console.error("Payment verification error:", error);
 
         setError(
@@ -69,12 +92,18 @@ function PaymentSuccess() {
             "We could not verify your payment.",
         );
       } finally {
-        setLoading(false);
+        if (!cancelled) {
+          setLoading(false);
+        }
       }
     };
 
     verifyPayment();
-  }, []);
+
+    return () => {
+      cancelled = true;
+    };
+  }, [authLoading, user, reference, cart, clearCart, navigate]);
 
   if (loading) {
     return (
