@@ -6,6 +6,12 @@ function Admin() {
   const [products, setProducts] = useState([]);
 
   const [orders, setOrders] = useState([]);
+  const [feedbackList, setFeedbackList] = useState([]);
+  const [feedbackLoading, setFeedbackLoading] = useState(true);
+  const [feedbackError, setFeedbackError] = useState("");
+  const [replyMessages, setReplyMessages] = useState({});
+  const [replyingTo, setReplyingTo] = useState(null);
+  const [feedbackMessage, setFeedbackMessage] = useState("");
 
   const [loading, setLoading] = useState(true);
   const [ordersLoading, setOrdersLoading] = useState(true);
@@ -81,8 +87,8 @@ function Admin() {
   useEffect(() => {
     fetchProducts();
     fetchOrders();
+    fetchFeedback();
   }, []);
-
   const fetchProducts = async () => {
     try {
       const response = await api.get("/products");
@@ -111,6 +117,81 @@ function Admin() {
       console.error("Failed to fetch orders:", error);
     } finally {
       setOrdersLoading(false);
+    }
+  };
+  const fetchFeedback = async () => {
+    try {
+      setFeedbackLoading(true);
+      setFeedbackError("");
+
+      const response = await api.get("/feedback");
+
+      setFeedbackList(response.data);
+    } catch (error) {
+      console.error("Failed to fetch feedback:", error);
+
+      setFeedbackError(
+        error.response?.data?.message || "Failed to load customer feedback.",
+      );
+    } finally {
+      setFeedbackLoading(false);
+    }
+  };
+
+  const handleFeedbackReply = async (feedbackId) => {
+    const reply = replyMessages[feedbackId]?.trim();
+
+    if (!reply) {
+      setFeedbackMessage("Please enter a reply before sending.");
+      return;
+    }
+
+    try {
+      setReplyingTo(feedbackId);
+      setFeedbackMessage("");
+
+      const response = await api.post(`/feedback/${feedbackId}/reply`, {
+        message: reply,
+      });
+
+      setFeedbackList((current) =>
+        current.map((item) =>
+          item._id === feedbackId ? response.data.feedback : item,
+        ),
+      );
+
+      setReplyMessages((current) => ({
+        ...current,
+        [feedbackId]: "",
+      }));
+
+      setFeedbackMessage("Reply sent successfully to the customer's email.");
+    } catch (error) {
+      console.error("Feedback reply error:", error);
+
+      setFeedbackMessage(
+        error.response?.data?.message || "Failed to send reply.",
+      );
+    } finally {
+      setReplyingTo(null);
+    }
+  };
+
+  const markFeedbackAsRead = async (feedbackId) => {
+    try {
+      const response = await api.patch(`/feedback/${feedbackId}/read`);
+
+      setFeedbackList((current) =>
+        current.map((item) =>
+          item._id === feedbackId ? response.data.feedback : item,
+        ),
+      );
+    } catch (error) {
+      console.error("Mark feedback as read error:", error);
+
+      setFeedbackMessage(
+        error.response?.data?.message || "Failed to mark feedback as read.",
+      );
     }
   };
 
@@ -824,6 +905,151 @@ function Admin() {
                   <strong>₦{Number(order.totalAmount).toLocaleString()}</strong>
                 </div>
               </div>
+            ))}
+          </div>
+        )}
+      </section>
+      {/* CUSTOMER FEEDBACK */}
+      <section className="admin-feedback">
+        <div className="section-heading">
+          <div>
+            <p>CUSTOMER SUPPORT</p>
+            <h2>Customer Feedback Inbox</h2>
+          </div>
+
+          <button type="button" className="view-all" onClick={fetchFeedback}>
+            Refresh Feedback
+          </button>
+        </div>
+
+        <p>
+          Total messages: {feedbackList.length} | Unread:{" "}
+          {feedbackList.filter((item) => !item.isRead).length}
+        </p>
+
+        {feedbackMessage && (
+          <p className="auth-message" role="status">
+            {feedbackMessage}
+          </p>
+        )}
+
+        {feedbackLoading ? (
+          <p>Loading customer feedback...</p>
+        ) : feedbackError ? (
+          <p role="alert">{feedbackError}</p>
+        ) : feedbackList.length === 0 ? (
+          <p>No customer feedback yet.</p>
+        ) : (
+          <div className="admin-feedback-list">
+            {feedbackList.map((item) => (
+              <article
+                className={`admin-feedback-card ${
+                  item.isRead ? "feedback-read" : "feedback-unread"
+                }`}
+                key={item._id}
+              >
+                <div className="admin-feedback-header">
+                  <div>
+                    <h3>{item.name}</h3>
+                    <p>{item.email}</p>
+                  </div>
+
+                  <span>{item.isRead ? "Read" : "Unread"}</span>
+                </div>
+
+                <p>
+                  <strong>Category:</strong> {item.category}
+                </p>
+
+                <p>
+                  <strong>Received:</strong>{" "}
+                  {new Date(item.createdAt).toLocaleString()}
+                </p>
+
+                <div className="admin-feedback-message">
+                  <strong>Customer message</strong>
+                  <p>{item.message}</p>
+                </div>
+
+                {!item.isRead && (
+                  <button
+                    type="button"
+                    className="view-all"
+                    onClick={() => markFeedbackAsRead(item._id)}
+                  >
+                    Mark as Read
+                  </button>
+                )}
+
+                <div className="admin-feedback-replies">
+                  <h4>Previous Replies</h4>
+
+                  {item.replies?.length ? (
+                    item.replies.map((reply, index) => (
+                      <div
+                        className="admin-feedback-reply"
+                        key={`${item._id}-reply-${index}`}
+                      >
+                        <p>{reply.message}</p>
+
+                        <small>{new Date(reply.sentAt).toLocaleString()}</small>
+
+                        <small>
+                          {reply.emailSent
+                            ? "Email sent"
+                            : "Email not confirmed"}
+                        </small>
+                      </div>
+                    ))
+                  ) : (
+                    <p>No replies yet.</p>
+                  )}
+                </div>
+
+                <form
+                  className="admin-feedback-reply-form"
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    handleFeedbackReply(item._id);
+                  }}
+                >
+                  <label htmlFor={`reply-${item._id}`}>
+                    Reply to {item.name}
+                  </label>
+
+                  <textarea
+                    id={`reply-${item._id}`}
+                    value={replyMessages[item._id] || ""}
+                    onChange={(e) =>
+                      setReplyMessages((current) => ({
+                        ...current,
+                        [item._id]: e.target.value,
+                      }))
+                    }
+                    placeholder="Write your response to the customer..."
+                    maxLength={3000}
+                    required
+                  />
+
+                  <button
+                    type="submit"
+                    className="admin-submit-button"
+                    disabled={replyingTo === item._id}
+                  >
+                    {replyingTo === item._id
+                      ? "Sending Reply..."
+                      : "Send Reply by Email"}
+                  </button>
+                </form>
+
+                <button
+                  type="button"
+                  className="delete-button"
+                  onClick={() => deleteFeedback(item._id)}
+                >
+                  Delete Feedback
+                </button>
+              </article>
             ))}
           </div>
         )}

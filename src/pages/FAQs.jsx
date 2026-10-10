@@ -42,7 +42,6 @@ function FAQs() {
       {" "}
       <h1>Frequently Asked Questions</h1>{" "}
       <p>Find answers to common questions about shopping on NattyExpress.</p>
-      ```
       {faqs.map((faq, index) => (
         <details
           key={index}

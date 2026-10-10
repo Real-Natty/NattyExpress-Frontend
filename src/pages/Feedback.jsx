@@ -65,7 +65,7 @@ function Feedback() {
         }}
       >
         <h1 style={{ marginBottom: "10px" }}>Feedback & Suggestions</h1>
-        ```
+
         <p style={{ color: "#666", lineHeight: "1.7" }}>
           Your opinion matters to us. Share your suggestions, ask questions, or
           tell us how we can improve your NattyExpress shopping experience.
